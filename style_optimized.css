@@ -1,0 +1,518 @@
+/* CSS: 基於 new.html 的現代化設計，並融合了 index.html 的財務樣式 - 優化版 */
+:root {
+    --bg-primary: #0a0e13;
+    --bg-secondary: #0f1720;
+    --bg-card: linear-gradient(135deg, rgba(15,23,32,0.95), rgba(10,14,19,0.98));
+    --text-primary: #e6f6f1;
+    --text-muted: #9aa4ad;
+    --accent-green: #00ff7a;
+    --accent-blue: #00d1ff;
+    --accent-orange: #ff9500;
+    --danger: #ff6b6b;
+    --success: var(--accent-green);
+    --warning: #ffcc66;
+    --glass: rgba(255,255,255,0.03);
+    --glass-border: rgba(255,255,255,0.05);
+    --shadow: 0 8px 32px rgba(0,0,0,0.3);
+    --radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    background: linear-gradient(135deg, #061018 0%, #0a0e13 50%, #071217 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 20px;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* --- Header --- */
+header {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+
+.logo-section h1 {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+}
+
+.logo-section .subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.user-section {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.user-info {
+    text-align: right;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.user-select {
+    min-width: 100px;
+}
+
+/* --- Navigation --- */
+nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding: 4px;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+nav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+.tab {
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: var(--glass);
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.tab:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--glass-border);
+}
+
+.tab.active {
+    background: linear-gradient(135deg, rgba(0,255,122,0.1), rgba(0,209,255,0.1));
+    border-color: rgba(0,255,122,0.2);
+    color: var(--accent-green);
+    box-shadow: 0 0 20px rgba(0,255,122,0.15);
+}
+
+/* --- Grid Layout --- */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+}
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+.card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.card h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+/* --- KPI Cards --- */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(0,255,122,0.2);
+    transform: translateY(-2px);
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.kpi-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent-green);
+}
+
+/* --- Form Elements / Inputs --- */
+.form-group {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+input, select, textarea {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #c0ccda; /* 柔和的淡藍色文字 */
+    font-size: 14px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent-green);
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 0 0 3px rgba(0,255,122,0.1);
+}
+
+.input-small {
+    width: 120px;
+    flex-basis: 120px;
+}
+
+.full-width-input, .full-width-select {
+    width: 100%;
+}
+
+/* --- Buttons --- */
+.btn {
+    background: linear-gradient(135deg, var(--accent-green), #00d68a);
+    color: #021012;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,255,122,0.3);
+}
+
+.btn-secondary {
+    background: var(--glass);
+    color: var(--accent-green);
+    border: 1px solid rgba(0,255,122,0.2);
+    box-shadow: none;
+}
+.btn-secondary:hover {
+     background: rgba(255,255,255,0.05);
+     transform: none;
+     box-shadow: none;
+}
+.btn-danger {
+    background: var(--danger);
+    color: var(--text-primary);
+}
+.btn-danger:hover {
+    box-shadow: 0 4px 8px rgba(255,107,107,0.3);
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+.full-width-btn {
+    width: 100%;
+    margin-top: 8px;
+}
+.flex-grow {
+    flex-grow: 1;
+}
+
+/* --- Log List & Finance --- */
+.list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.log-item, .finance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    font-size: 14px;
+    cursor: pointer;
+}
+.log-item:hover, .finance-row:hover { 
+    background: rgba(255,255,255,0.05);
+}
+
+.finance-amount {
+    font-weight: bold;
+}
+.finance-amount.in {
+    color: var(--accent-green);
+}
+.finance-amount.out {
+    color: var(--danger);
+}
+.finance-summary-row {
+    margin-top: 10px;
+    cursor: default;
+    background: rgba(0,255,122,0.1); /* 總結行使用淡綠色背景 */
+}
+.finance-summary-row:hover {
+    background: rgba(0,255,122,0.1);
+}
+
+/* --- Utility Classes (for clean HTML) --- */
+.section {
+    display: none;
+}
+.section.active {
+    display: block;
+}
+.text-muted {
+    color: var(--text-muted);
+}
+.text-muted-small {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.margin-top-small {
+    margin-top: 8px;
+}
+.margin-top-medium {
+    margin-top: 16px;
+}
+
+/* --- Dashboard Specific Styles (Refinement) --- */
+.personalized-suggestions-card {
+    margin-top: 20px;
+    border-color: rgba(0,255,122,0.2); 
+    background: rgba(0,255,122,0.05);
+}
+
+/* 資訊區塊通用樣式 */
+.card-info-block {
+    margin-bottom: 20px;
+}
+.info-label {
+    margin-bottom: 8px;
+}
+.macro-text {
+    margin-bottom: 8px;
+}
+.health-msg {
+    margin-top: 8px;
+}
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    margin-bottom: 0px;
+}
+.wrap-inputs {
+    flex-wrap: wrap;
+}
+
+/* 進度條 */
+.progress-bar-container {
+    height: 14px;
+    background: #0d1113;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+}
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,var(--accent-green),#00d68a);
+    transition: width 0.4s;
+}
+
+/* 側邊欄 BMR/TDEE & Water Progress */
+#sidebar .info-box-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+#sidebar .info-box {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    text-align: center;
+}
+#sidebar .info-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 4px;
+}
+#sidebar .info-label-small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.progress-info-item {
+    margin-bottom: 15px;
+}
+.progress-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent-blue);
+    margin-top: 4px;
+    text-align: right;
+}
+.progress-bar-container-small {
+    height: 6px;
+    background: #0d1113;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar-fill-small {
+    height: 100%;
+    width: 0%;
+    background: var(--accent-blue);
+    transition: width 0.4s;
+}
+
+
+/* 統計圖表 */
+.stats-chart-canvas {
+    max-height: 400px;
+    width: 100% !important;
+    height: auto !important;
+}
+.stats-summary-text {
+    margin-top: 15px;
+}
+
+/* 設定頁面優化 */
+.settings-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 520px;
+}
+.setting-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.setting-label {
+    min-width: 120px;
+    margin-bottom: 0;
+}
+.setting-actions {
+    margin-top: 20px !important;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    #sidebar {
+        order: 3;
+    }
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 640px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .user-section {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+    .input-row {
+        flex-direction: column;
+    }
+    .input-small {
+        width: 100%;
+        flex-basis: auto;
+    }
+    .input-row.wrap-inputs {
+        flex-direction: row;
+        gap: 6px;
+    }
+    .input-row.wrap-inputs > * {
+        flex-basis: calc(50% - 3px);
+        margin: 0;
+    }
+    .input-row.wrap-inputs .input-small, .input-row.wrap-inputs .checkbox-label {
+        flex-basis: calc(50% - 4px);
+    }
+    .input-row.wrap-inputs .btn-secondary {
+        flex-basis: 100%;
+    }
+}

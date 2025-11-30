@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daily Wellness Pro - 健康管理系統 (優化版)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="style_optimized.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-section">
+                <h1>Daily Wellness Pro</h1>
+                <div class="subtitle">運動 • 飲食 • 心情 • 財務 完整追蹤</div>
+            </div>
+            <div class="user-section">
+                <div class="user-info" id="userInfo">未設定個人檔案</div>
+                <select id="userSelect" class="user-select"></select>
+                <button class="btn btn-secondary" id="addUserBtn">新增使用者</button>
+            </div>
+        </header>
+
+        <nav id="appNav">
+            <div class="tab active" data-tab="dashboard">儀表板</div>
+            <div class="tab" data-tab="nutrition">飲食</div>
+            <div class="tab" data-tab="exercise">運動</div>
+            <div class="tab" data-tab="finance">財務</div>
+            <div class="tab" data-tab="log">日誌</div>
+            <div class="tab" data-tab="stats">統計</div>
+            <div class="tab" data-tab="plan">課表</div>
+            <div class="tab" data-tab="settings">設定</div>
+            <div class="tab" data-tab="data">資料</div>
+        </nav>
+
+        <div class="grid">
+            <main id="mainContent">
+                
+                <section id="dashboard" class="section active">
+                    <div class="card">
+                        <h2>今日概況</h2>
+                        <div class="kpi-grid">
+                            <div class="kpi-card"><div class="kpi-label">建議攝取 (TDEE)</div><div class="kpi-value" id="kcalGoal">0</div></div>
+                            <div class="kpi-card"><div class="kpi-label">今日攝取 kcal</div><div class="kpi-value" id="kcalIn">0</div></div>
+                            <div class="kpi-card"><div class="kpi-label">今日消耗 kcal</div><div class="kpi-value" id="kcalOut">0</div></div>
+                            <div class="kpi-card"><div class="kpi-label">熱量差</div><div class="kpi-value" id="kcalDiff">0</div></div>
+                        </div>
+
+                        <div class="card-info-block">
+                            <label class="info-label">身體組成 (估算 & 自測比對)</label>
+                            <div class="text-muted-small">
+                                BMI: <span id="bmiValDashboard">—</span> • 體脂: <span id="bodyFatValDashboard">—</span>% • 去脂體重: <span id="lbmValDashboard">—</span> kg • 估計肌肉: <span id="muscleValDashboard">—</span> kg
+                            </div>
+                        </div>
+                        
+                        <div class="card-info-block">
+                            <label class="info-label">巨量營養素攝取進度</label>
+                            <div id="macroInfo" class="text-muted-small macro-text">—</div>
+                            <div class="progress-bar-container">
+                                <div id="todayScore" class="progress-bar-fill"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-info-block">
+                            <label class="info-label">今日心情 / 飲水 / 睡眠</label>
+                            <div class="input-row wrap-inputs">
+                                <select id="moodSelect" class="input-small"><option value="">選擇心情</option><option value="1">1 - 很差</option><option value="2">2 - 不太好</option><option value="3">3 - 還好</option><option value="4">4 - 不錯</option><option value="5">5 - 很好</option></select>
+                                <input type="number" id="waterAmount" class="input-small" placeholder="飲水 ml">
+                                <button id="saveWaterBtn" class="btn btn-secondary btn-small">儲存飲水</button>
+                                <select id="sleepSelect" class="input-small"><option value="">睡眠品質</option><option value="1">1 - 很差</option><option value="2">2 - 不好</option><option value="3">3 - 尚可</option><option value="4">4 - 良好</option><option value="5">5 - 優</option></select>
+                                <label class="checkbox-label"><input type="checkbox" id="sickCheckbox"> 今天有生病</label>
+                            </div>
+                            <div id="healthStatusMsg" class="text-muted-small health-msg">—</div>
+                        </div>
+
+                        <div class="card personalized-suggestions-card">
+                            <h2>個人化建議與評價</h2>
+                            <div id="personalizedSuggestions" style="margin-bottom: 20px;">
+                                <p class="text-muted">正在分析數據...</p>
+                            </div>
+                            
+                            <div class="card-info-block" style="border-top: 1px solid var(--glass-border); padding-top: 15px;">
+                                <label class="info-label">🎧 心情音樂推薦</label>
+                                <div id="musicRecommendation" class="text-muted-small">
+                                    請先記錄您的心情，或點擊「儲存飲水」按鈕以更新推薦。
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="nutrition" class="section">
+                    <div class="card">
+                        <h2>飲食記錄 (點擊項目刪除)</h2>
+                        <div class="form-group">
+                            <label>新增食物到今日日誌</label>
+                            <div class="input-row">
+                                <select id="foodSelect" style="flex:1;"><option value="">選擇食物</option></select>
+                                <select id="foodInputMode" class="input-small" title="輸入模式：以份 或 以克"><option value="unit">以份</option><option value="g">以克</option></select>
+                                <input type="number" id="foodAmount" class="input-small" placeholder="份量">
+                                <button id="addFoodBtn" class="btn">新增</button>
+                            </div>
+                            <div id="foodInfo" class="text-muted-small food-info"></div>
+                        </div>
+                        
+                        <h3>今日飲食記錄</h3>
+                        <div class="list-container" id="foodLog">
+                            <p class="text-muted">目前沒有飲食記錄。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="exercise" class="section">
+                    <div class="card">
+                        <h2>運動記錄 (點擊項目刪除)</h2>
+                        <div class="form-group">
+                            <label>新增運動到今日日誌</label>
+                            <div class="input-row">
+                                <select id="exerciseType" style="flex:1;"><option value="">選擇運動項目</option></select>
+                                <select id="exerciseInputMode" class="input-small"><option value="minutes">分鐘</option><option value="reps">次數</option></select>
+                                <input type="number" id="exerciseMinutes" class="input-small" placeholder="分鐘 / 次數">
+                                <button id="addExerciseBtn" class="btn">新增</button>
+                            </div>
+                        </div>
+                        
+                        <h3>今日運動記錄</h3>
+                        <div class="list-container" id="exerciseLog">
+                             <p class="text-muted">目前沒有運動記錄。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="finance" class="section">
+                    <div class="card">
+                        <h2>財務記錄 (點擊項目刪除)</h2>
+                        <div class="form-group">
+                             <label>新增財務記錄</label>
+                            <div class="input-row">
+                                <input type="text" id="financeNote" placeholder="項目說明" style="flex-grow: 1;">
+                                <select id="financeType" class="input-small finance-type-select"><option value="out">支出</option><option value="in">收入</option></select>
+                                <input type="number" id="financeAmount" placeholder="金額" class="input-small finance-amount-input">
+                                <button id="addFinanceBtn" class="btn">新增</button>
+                            </div>
+                        </div>
+                        
+                        <h3>今日財務記錄</h3>
+                        <div id="financeList" class="list-container">
+                             <p class="text-muted">目前沒有財務記錄。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="log" class="section">
+                    <div class="card">
+                        <h2>所有日誌記錄 (今日)</h2>
+                        <div class="list-container" id="logList">
+                             <p class="text-muted">目前沒有任何日誌記錄。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="stats" class="section">
+                    <div class="card">
+                        <h2>統計分析 (最近 14 天)</h2>
+                        <canvas id="statsCanvas" class="stats-chart-canvas"></canvas>
+                        <div id="statsSummary" class="text-muted-small stats-summary-text">—</div>
+                    </div>
+                </section>
+
+                <section id="settings" class="section">
+                    <div class="card">
+                        <h2>個人設定與計算</h2>
+                        <div class="settings-form-container">
+                            
+                            <div class="form-group">
+                                <label>基本資料</label>
+                                <div class="input-row">
+                                    <input id="profileName" placeholder="姓名 (選填)">
+                                    <select id="profileSex" class="input-small"><option value="male">男性</option><option value="female">女性</option></select>
+                                </div>
+                                <div class="input-row margin-top-small">
+                                    <input id="profileAge" type="number" placeholder="年齡" class="input-small">
+                                    <input id="profileHeight" type="number" placeholder="身高 cm" class="input-small">
+                                    <input id="profileWeight" type="number" placeholder="體重 kg" class="input-small">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>活動量與飲水目標</label>
+                                <div class="setting-row">
+                                    <label class="setting-label">活動量係數</label>
+                                    <select id="activityFactor">
+                                        <option value="1.2">久坐 (1.2)</option><option value="1.375">輕度活動 (1.375)</option><option value="1.55">中度活動 (1.55)</option><option value="1.725">高度活動 (1.725)</option><option value="1.9">非常活躍 (1.9)</option>
+                                    </select>
+                                </div>
+                                <div class="setting-row margin-top-small">
+                                    <label class="setting-label">每日飲水目標 (ml)</label>
+                                    <input id="profileWaterGoal" type="number" placeholder="2000">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>巨量營養素目標 (每日克數)</label>
+                                <div class="input-row">
+                                    <input id="profileProtein" type="number" placeholder="蛋白質 g" class="input-small">
+                                    <input id="profileCarbs" type="number" placeholder="碳水 g" class="input-small">
+                                    <input id="profileFat" type="number" placeholder="脂肪 g" class="input-small">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>體脂計算圍度法 (U.S. Navy)</label>
+                                <div class="input-row">
+                                    <input id="profileWaist" type="number" placeholder="腰圍 (cm)">
+                                    <input id="profileNeck" type="number" placeholder="頸圍 (cm)">
+                                    <input id="profileHip" type="number" placeholder="臀圍 (cm, 女性需填)">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>體脂機 / 專業測量結果</label>
+                                <div class="input-row">
+                                    <input id="userMeasuredBodyFat" type="number" placeholder="體脂率 % (自測)">
+                                </div>
+                            </div>
+                            
+                            <div class="setting-row">
+                                <label class="setting-label">體脂估算方法</label>
+                                <select id="bodyFatMethodSelect">
+                                    <option value="navy">U.S. Navy（圍度法）</option>
+                                    <option value="deurenberg">Deurenberg (BMI/age/sex)</option>
+                                    <option value="cunbae">CUN-BAE (較精細的 BMI/age/sex)</option>
+                                </select>
+                            </div>
+
+                            <div class="input-row setting-actions margin-top-medium">
+                                <button class="btn btn-secondary flex-grow" id="calcBodyComp">估算 BMI / 體脂 / LBM</button>
+                                <button class="btn flex-grow" id="saveProfileBtn">儲存所有設定</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="plan" class="section">
+                    <div class="card">
+                        <h2>課表與建議</h2>
+                        <div class="form-group">
+                            <label>每日運動課表</label>
+                            <select id="planSelect" class="full-width-select">
+                                <option value="">選擇課表</option>
+                                <option value="light">輕量有氧週</option>
+                                <option value="strength">增肌重訓週</option>
+                                <option value="hiit">HIIT強化週</option>
+                            </select>
+                            <button class="btn btn-secondary full-width-btn" id="applyPlan">套用課表</button>
+                        </div>
+                        
+                        <div class="card-info-block plan-info-block">
+                             <label class="info-label">今日建議</label>
+                            <div id="todayPlan" class="text-muted-small plan-text">今日建議：—</div>
+                            <button class="btn btn-secondary full-width-btn" id="addPlanTodayBtn">新增今日建議至日誌</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="data" class="section">
+                    <div class="card">
+                        <h2>資料管理</h2>
+                        <button class="btn btn-danger full-width-btn" id="clearDataBtn">清除所有本地資料</button>
+                    </div>
+                </section>
+
+            </main>
+
+            <aside id="sidebar">
+                <div class="card">
+                    <h2>身體代謝資訊</h2>
+                    <div class="info-box-grid">
+                        <div class="info-box">
+                            <div class="info-label-small">BMR (基礎代謝)</div>
+                            <div class="info-value" id="bmrVal">—</div>
+                        </div>
+                         <div class="info-box">
+                            <div class="info-label-small">TDEE (總消耗)</div>
+                            <div class="info-value" id="tdeeVal">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card margin-top-medium">
+                    <h2>本日進度</h2>
+                    <div class="progress-info-item">
+                        <div class="info-label-small">飲水目標 (<span id="waterGoalVal">2000</span> ml)</div>
+                        <div class="progress-bar-container-small">
+                            <div id="waterProgress" class="progress-bar-fill-small"></div>
+                        </div>
+                        <div class="progress-value" id="waterProgressVal">0 ml</div>
+                    </div>
+                </div>
+                
+                <div class="card margin-top-medium">
+                    <h2>快速操作</h2>
+                    <input type="number" id="quickWeightInput" placeholder="輸入今日體重 kg" class="full-width-input margin-bottom-small">
+                    <button class="btn full-width-btn" id="recordWeightBtn">記錄體重</button>
+                </div>
+
+            </aside>
+        </div>
+    </div>
+    
+    <script src="app_optimized.js"></script>
+</body>
+</html>

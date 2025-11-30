@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>台北 YouBike 地圖</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 600px; margin-bottom: 10px; }
+        #stats { font-size: 16px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>台北 YouBike 地圖</h2>
+<div id="stats">載入中...</div>
+<div id="map"></div>
+<button id="btn_refresh">手動更新資料</button>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+
+
+// 初始化地圖
+let map = L.map('map').setView([25.033964, 121.564468], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// icons：綠 / 紅 / 灰（未知）
+let greenIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34]
+});
+let redIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34]
+});
+let greyIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34]
+});
+
+// layerGroup（管理所有 marker）
+let layerGroup = L.layerGroup().addTo(map);
+
+// 取得並更新地圖與統計（已依你提供的 sample 優先使用 available_rent_bikes）
+async function updateMap() {
+    // 小型 helper：遞迴尋找合適的整數（limit depth）
+    function findNumericInObj(obj, depth = 0) {
+        if (obj == null || depth > 3) return null;
+        if (typeof obj === 'number') return obj;
+        if (typeof obj === 'string') {
+            const m = obj.match(/-?\d+/);
+            if (m) return parseInt(m[0], 10);
+            return null;
+        }
+        if (typeof obj === 'object') {
+            // 優先找常見 key
+            const prefer = ['available_rent_bikes','available_return_bikes','available_rent','available','Quantity','qty','count','sbi','SBI','bemp','empty'];
+            for (const k of prefer) {
+                if (k in obj) {
+                    const v = findNumericInObj(obj[k], depth + 1);
+                    if (v != null && Number.isFinite(v)) return v;
+                }
+            }
+            // 其他 key
+            for (const v of Object.values(obj)) {
+                const r = findNumericInObj(v, depth + 1);
+                if (r != null && Number.isFinite(r)) return r;
+            }
+        }
+        return null;
+    }
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/youbike");
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        // 印出 sample 與第一筆完整物件，方便檢查
+        let sampleArr;
+        if (Array.isArray(data)) sampleArr = data.slice(0,3);
+        else if (data && data.retVal) sampleArr = Object.values(data.retVal).slice(0,3);
+        else if (data && typeof data === 'object') sampleArr = Object.values(data).slice(0,3);
+        else sampleArr = [];
+        console.log('youbike raw data sample (first 3):', sampleArr);
+        if (sampleArr[0]) {
+            console.log('first station full object:', sampleArr[0]);
+            console.log('first station keys:', Object.keys(sampleArr[0]));
+        }
+
+        // normalize 回傳為陣列
+        let stations;
+        if (Array.isArray(data)) stations = data;
+        else if (data && typeof data === 'object' && data.retVal && typeof data.retVal === 'object') stations = Object.values(data.retVal);
+        else if (data && typeof data === 'object') stations = Object.values(data);
+        else stations = [];
+
+        // 清除舊 markers
+        layerGroup.clearLayers();
+
+        let totalRaw = stations.length;
+        let processed = 0;
+        let redCount = 0;
+        let greenCount = 0;
+        let unknownCount = 0;
+
+        stations.forEach(st => {
+            // 座標容錯（加入常見命名）
+            let lat = parseFloat(st.lat ?? st.Lat ?? st.latitude ?? st.Y ?? st.y ?? st.py ?? st.Py ?? st.Latitude ?? st.lat_y);
+            let lng = parseFloat(st.lng ?? st.Lng ?? st.longitude ?? st.X ?? st.x ?? st.px ?? st.Px ?? st.Longitude ?? st.lng_x);
+            if (isNaN(lat) || isNaN(lng)) return;
+            processed++;
+
+            // 依 sample 優先使用 available_rent_bikes，然後遞迴偵測
+            let sbiRaw = st.available_rent_bikes ?? st.available_rent ?? st.available ?? st.Quantity ?? st.qty ?? st.count ?? st.sbi ?? st.SBI ?? null;
+            let sbi = null;
+            if (sbiRaw != null) {
+                if (typeof sbiRaw === 'number') sbi = sbiRaw;
+                else if (typeof sbiRaw === 'string') {
+                    const m = sbiRaw.match(/-?\d+/);
+                    if (m) sbi = parseInt(m[0], 10);
+                } else if (typeof sbiRaw === 'object') {
+                    sbi = findNumericInObj(sbiRaw, 0);
+                }
+            }
+            // fallback: 大範圍尋找第一個看起來合理的數字
+            if (sbi == null) sbi = findNumericInObj(st);
+
+            let wasUnknown = (sbi === null || !Number.isFinite(sbi));
+            if (wasUnknown) {
+                unknownCount++;
+                sbi = 0;
+            }
+
+            let icon = greyIcon;
+            if (!wasUnknown && sbi < 5) { redCount++; icon = redIcon; }
+            else if (!wasUnknown) { greenCount++; icon = greenIcon; }
+
+            // 常見欄位名稱
+            let name = st.sna ?? st.name ?? st.stationName ?? st.station ?? st.StationName ?? '';
+            let empty = st.bemp ?? st.empty ?? st.available_spaces ?? st.available_return_bikes ?? '-';
+            let addr = st.ar ?? st.address ?? st.addr ?? st.ARE ?? st.aren ?? '';
+
+            let popup = `<b>${name}</b><br>可借: ${sbi}${wasUnknown ? '（未知）' : ''}<br>可還: ${empty}<br>${addr}`;
+            let marker = L.marker([lat, lng], {icon}).bindPopup(popup);
+            layerGroup.addLayer(marker);
+        });
+
+        document.getElementById('stats').innerText =
+            `總站點數（raw）：${totalRaw} | 有座標站點：${processed} | 紅色（可借 < 5）：${redCount} | 綠色（可借 ≥ 5）：${greenCount} | 未知：${unknownCount}`;
+
+    } catch (err) {
+        console.error('updateMap failed:', err);
+        document.getElementById('stats').innerText = '資料載入失敗（請檢查後端或 Console）';
+    }
+}
+
+// 手動更新按鈕
+document.getElementById('btn_refresh').addEventListener('click', updateMap);
+
+// 自動更新
+updateMap();
+setInterval(updateMap, 60 * 1000);
+
+
+</script>
+</body>
+</html>
